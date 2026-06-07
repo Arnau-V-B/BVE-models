@@ -1,4 +1,4 @@
-# Global non-divergent Barotropic Vorticity Equation (BVE) linear and nonlinear solvers
+# Global non-divergent Barotropic Vorticity Equation (BVE) $$\beta$$-channel solver
 
 This model solves the non-divergent BVE on the $$\beta$$-plane aproximation in cartesian coordinates using Fast Fourier Transforms (FFT) in x and a centered differences scheme in y. It is designed to simulate Rossby wave propagation and dispersion in the most simple aproximation (a $$\beta$$-channel) so that the results can be directly compared to the analytic solutions that appear after solving the system. It also includes the option to add an very simple extra forcing term to the equation that takes into account the effect of topography through changes in depth.
 
@@ -10,7 +10,7 @@ The model solves the equation in a latitudinally enclosed domain, with periodic 
 
 In a latitudinally restricted domain, the sphericity of the Earth's can have negligible effects so the surface can be considered as locally flat in pretty good approximation. In this case, the Coriolis parameter $$f$$ becomes constant with latitude, so the planetary vorticity advection effect disappears completely and Rossby waves as they are known can no longer exist. In order to avoid this, a more accurate approximation can be made by expanding the Coriolis parameter in a Taylor series around the central latitude $\theta_0$ up to the first order (i.e., linearly):
 
-$$f \approx f_0 + \beta y \quad \mathrm{; with} \quad \beta = \frac{\partial f}{\partial y}|_{\theta_0} = \frac{2\Omega}{R}\cos\theta_0 = ctt;$$
+$$f \approx f_0 + \beta y \quad \mathrm{; with} \quad \beta = \left.\frac{\partial f}{\partial y}\right|_{\theta_0} = \frac{2\Omega}{R}\cos\theta_0 = ctt;$$
 
 where $$\Omega$$ is the angular rotation speed of the Earth and $$R$$ its radius. In this case, given a background flow with the following properties: $$u = \overline{U} + u' \ ; \ v = v'$$ (where $$\overline{}$$ denotes the mean state and ' the perturbation), the non-divergent BVE can be linearized as follows:
 
