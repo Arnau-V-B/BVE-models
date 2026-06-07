@@ -10,7 +10,7 @@ In this approximation, the atmosphere is treated as a barotropic incompressible 
 
 ## Models
 
-(in increasing complexity)
+(*in increasing complexity...*)
 
 ### [BVE-beta-channel-model](BVE-beta-channel-model/README.md)
 
