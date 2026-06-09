@@ -36,7 +36,7 @@ save_time = 3 * 3600                  # Time interval between saves (in s)
 # INITIAL CONDITIONS ========================================================================================
 
 # Initial relative vorticity field
-dataset_name = "forecast_15-04-2026_glob.nc"     # Name of the dataset file
+dataset_name = "reanalysis/forecast_15-04-2026_glob.nc"     # Name of the dataset file
 
 # We open and read the relative vorticity dataset
 ds = xr.open_dataset(dataset_name, engine='netcdf4')
