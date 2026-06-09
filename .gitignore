@@ -1,8 +1,17 @@
 __pycache__/
+.vscode
 output/
 output_linear/
 output_nonlinear/
 temp/
+
+env/
+venv/
+my_env/
+.env
+.venv
+.my_env
+
 *.nc
 *.png
 *.gif
