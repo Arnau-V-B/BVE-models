@@ -7,6 +7,8 @@ This program solves the non-divergent BVE on the sphere using spherical harmonic
 
 The model uses a spectral transform method with triangular truncation, supports both equally sampled (Driscoll–Healy) and Gauss–Legendre quadrature grids (see SHTOOLS [documentation](https://github.com/SHTOOLS/SHTOOLS.git)), and includes implicit hyperdiffusion for numerical stability. The time integration follows a leapfrog scheme with a Robert–Asselin–Williams (RAW) filter to control its associated computational mode and improve the accuracy to third order (i.e. $$O(\Delta t^3)$$), and the time step is set to 30 min (but it can be lowered if numerical instability appears).
 
+[`reanalysis/`](./reanalysis/) folder contains some examples of reanalysis relative vorticity fields from [ERA5 hourly data on pressure levels from 1940 to present](https://cds.climate.copernicus.eu/datasets/reanalysis-era5-pressure-levels?tab=overview) in netCDF4 format to use as initial conditions to run the model. Nevertheless, the user may add any other `.nc` files as initial conditions in this folder.
+
 ## Mathematical formalism
 
 ### The linear and nonlinear BVE
@@ -55,13 +57,14 @@ where $$\nu=0.1$$ and $$\alpha=0.5$$ seem to conserve kinetic energy, enstrophy 
 
 ## Requirements
 
-All the code has been written in Python v3.13.7 on a Windows 11 laptop with both clarity and efficienty in mind, so there should be no problem running it in any computer hardware as long as it has Python installed. For the program to run, the following Python libraries need to be installed:
-- [numpy (v2.3.3)](https://pypi.org/project/numpy/)
-- [scipy (v1.16.2)](https://pypi.org/project/scipy/)
-- [xarray (v2025.10.1)](https://docs.xarray.dev/en/stable/)
+All the code has been written in Python v3.13.7 on a Windows 11 laptop with both clarity and efficienty in mind, so there should be no problem running it in any computer hardware as long as it has Python installed. In the general [`README.md`](../README.md) file, there is a [`requirements.txt`](../requirements.txt) file containing the packages needed for all models ready to be automatically installed with `pip`. However, if the user wants to install them manually, here are the Python packages that need to be installed for this specific model:
+- [numpy (v2.4.6)](https://pypi.org/project/numpy/)
+- [scipy (v1.17.1)](https://pypi.org/project/scipy/)
+- [xarray (v2026.4.0)](https://docs.xarray.dev/en/stable/)
+- [netcdf4 (v1.7.4)](https://pypi.org/project/netCDF4/)
 - [pyshtools (v4.14.1)](https://pypi.org/project/pyshtools/)
-- [matplotlib (v3.10.6)](https://pypi.org/project/matplotlib/)  (*not necessary if plotting is disabled*)
-- [imageio (v2.37.2)](https://pypi.org/project/ImageIO/)    (*not necessary if plotting is disabled*)
+- [matplotlib (v3.10.9)](https://pypi.org/project/matplotlib/)  (*not necessary if plotting is disabled*)
+- [imageio (v2.37.3)](https://pypi.org/project/ImageIO/)    (*not necessary if plotting is disabled*)
 
 > [!NOTE]
 > The versions shown are only orientative, as newer or older ones will most likely work just fine.

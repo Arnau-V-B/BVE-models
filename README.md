@@ -39,7 +39,25 @@ During the execution an `output/` folder is created in the same directory where 
 
 ## Requirements
 
-All the code has been written in Python v3.13.7 on a Windows 11 laptop with both clarity and efficienty in mind, so there should be no problem running it in any computer hardware as long as it has Python installed. The Python packages required for each of the models are specified on their corresponding `README.md` files.
+All the code has been written in Python v3.13.7 on a Windows 11 laptop with both clarity and efficienty in mind, so there should be no problem running it in any computer hardware as long as it has Python installed. The Python packages required for all the models are specified in the `requirements.txt` file so they can be automatically installed through `pip` in a fresh virtual environment:
+
+1. First, create a new virtual environment with Python `venv` in the directory that contains all the models. For Windows users this can be done by typing the following line in the CMD or PowerShell terminal:
+```
+python -m venv my_env
+```
+Where `my_env` is the name you want to give to your environment.
+
+2. Then, activate the new environment. Windows users need to type in the same terminal:
+```
+my_env\Scripts\activate
+```
+
+3. Finally, install all the required packages automatically using `pip` and providing it with the `requirements.txt` file:
+```
+pip install -r requirements.txt
+```
+
+In case the user wants to install the packages manually, each of the models `README.md` file shows a list of the required packages for each program.
 
 > [!WARNING]
 > All programs have only been tested with Windows 11, so Windows 10, MacOS and Linux users could possibly experience some problems running them.
