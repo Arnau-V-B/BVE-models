@@ -689,7 +689,6 @@ if __name__ == '__main__':
 			np.linspace(-max_abs/2, max_abs/2, 11),
 			np.linspace(max_abs/2, max_abs, 5)
 			])
-
 	levels = np.unique(levels)
 	norm = BoundaryNorm(levels, 256)
 
@@ -719,16 +718,11 @@ if __name__ == '__main__':
 
 	# Finally, we plot the streamfunction field evolution
 	images = []
-	vmin = np.min(streamfunctions.values)
-	vmax = np.max(streamfunctions.values)
-	step = 5e6
-	lvls = np.arange(vmin, vmax+step, step)
 
 	for i in range(len(times)):
 
 		fig, ax = plt.subplots(figsize=(8,4))
-		mesh = ax.contourf(lons,lats,streamfunctions[i],cmap='viridis',
-					 		levels=lvls, extend='both')
+		mesh = ax.contour(lons,lats,streamfunctions[i],cmap='coolwarm')
 		cbar = fig.colorbar(mesh, ax=ax, label=r'Stream function ($\mathrm{m^2/s}$)')
 		ax.set_title(f'Streamfunction field at t = {times[i]}h')
 		ax.set_xlabel(r'$\lambda$ (º)')
