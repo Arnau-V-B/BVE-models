@@ -564,16 +564,17 @@ if __name__ == '__main__':
 
 	# FIGURE PLOTTING =================================================================================================
 
-	print("\nGenerating figures...")
+	if PLOT:
+		print("\nGenerating figures...")
 
-	from plotting import *
-	
-	# We create the directory where the figures will be saved
-	im_dir = output_dir + output_name + "/figures/"
-	os.makedirs(im_dir, exist_ok=True)
-	os.makedirs(im_dir + "temp_frames/", exist_ok=True)
+		from plotting import *
+		
+		# We create the directory where the figures will be saved
+		im_dir = output_dir + output_name + "/figures/"
+		os.makedirs(im_dir, exist_ok=True)
+		os.makedirs(im_dir + "temp_frames/", exist_ok=True)
 
-	# First we plot a graph of the behaviour of the conserved values
-	plot_conserved_values(data_dir, output_name, im_dir)
-	# Then we plot the evolution of the vorticity and streamfunction fields
-	plot_fields_evolution(data_dir, output_name, im_dir)
+		# First we plot a graph of the behaviour of the conserved values
+		plot_conserved_values(data_dir, output_name, im_dir)
+		# Then we plot the evolution of the vorticity and streamfunction fields
+		plot_fields_evolution(data_dir, output_name, im_dir)
