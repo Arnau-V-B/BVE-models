@@ -589,147 +589,17 @@ if __name__ == '__main__':
 
 	# FIGURE PLOTTING =================================================================================================
 
-	print("\nGenerating figures...")
+	if PLOT:
+		print("\nGenerating figures...")
 
-	# We import the required libraries for the plots
-	import matplotlib.pyplot as plt
-	import matplotlib.ticker as ticker
-	from matplotlib.colors import BoundaryNorm
-	import imageio
+		from plotting import *
 
-	# We create the directory where the figures will be saved
-	im_dir = output_dir + output_name + "/figures/"
-	os.makedirs(im_dir, exist_ok=True)
-	os.makedirs(im_dir + "temp_frames/", exist_ok=True)
+		# We create the directory where the figures will be saved
+		im_dir = output_dir + output_name + "/figures/"
+		os.makedirs(im_dir, exist_ok=True)
+		os.makedirs(im_dir + "temp_frames/", exist_ok=True)
 
-	# 1) Evolution of the conserved values >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-	# We first read and extract the information in the corresponding Dataset
-	cons = xr.open_dataset(data_dir + cons_file, engine='netcdf4')
-
-	energies = cons['kinetic_energy']
-	enstrophies = cons['enstrophy']
-	vorticity_means = cons['mean_vorticity']
-	iterations = cons['iteration']
-
-	cons.close()
-
-	# We establish a fixed format for the y axis
-	y_formatter = ticker.ScalarFormatter(useOffset=True, useMathText=True)
-
-	# Then we plot the evolution of all the conserved magnitudes in a triple figure
-	fig, axs = plt.subplots(3,1, figsize=(8,8), sharex=True)
-	ax1, ax2, ax3 = axs
-
-	ene=ax1.plot(iterations,energies, label='Mean kinetic energy')
-	ax1.set_title("Evolution of conserved magnitudes")
-	ax1.set_ylabel('Mean kinetic energy (J/kg)')
-	ax1.set_xlim(iterations[0],iterations[-1])
-	ax1.yaxis.set_major_formatter(y_formatter)
-	ax1.ticklabel_format(axis='y', style='sci', scilimits=(-2, 2), useOffset=True)
-
-	ens=ax2.plot(iterations,enstrophies, label='Enstrophy')
-	ax2.set_ylabel(r'Enstrophy (1/s$^2$)')
-	ax2.set_xlim(iterations[0],iterations[-1])
-	ax2.yaxis.set_major_formatter(y_formatter)
-	ax2.ticklabel_format(axis='y', style='sci', scilimits=(-2, 2), useOffset=True)
-
-	zet=ax3.plot(iterations,vorticity_means, label='Mean vorticity')
-	ax3.set_ylabel('Mean vorticity (1/s)')
-	ax3.set_xlabel('Nº iterations')
-	ax3.set_xlim(iterations[0],iterations[-1])
-	ax3.yaxis.set_major_formatter(y_formatter)
-	ax3.ticklabel_format(axis='y', style='sci', scilimits=(-2, 2), useOffset=True)
-
-	fig.tight_layout()
-
-	plt.savefig(im_dir + cons_file[:-3] + ".png", dpi=150)
-	
-
-	# 2) Evolution of the relative vorticity and streamfunction fields >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-	# Again, we read and extract all the information contained in the Dataset
-	evo = xr.open_dataset(data_dir + evo_file, engine='netcdf4')
-
-	streamfunctions = evo['streamfunction']
-	vorticities = evo['vorticity']
-	lon = evo['lon']
-	lat = evo['lat']
-	lons, lats = np.meshgrid(lon, lat)
-	time_step = (evo['time'].values[1].astype('datetime64[s]') - 
-			evo['time'].values[0].astype('datetime64[s]')).astype(int)
-	times = [i*time_step / 3600 for i in range(len(evo['time'].values))]
-
-	# First we plot the vorticity field evolution
-
-	# We pick the levels of the colormap that best fit our data
-	# To do so, we use the percentiles to know the different scales of the data
-	all_data = vorticities.values.flatten()
-
-	# We compute the percentiles
-	p1 = np.percentile(all_data, 1)
-	p99 = np.percentile(all_data, 99)
-
-	# And we create a symmetric level scale based on the percentiles to give importance to
-	# the range of values where most of the data is
-	max_abs = max(abs(p1), abs(p99))
-	levels = np.concatenate([
-			np.linspace(-max_abs, -max_abs/2, 5),
-			np.linspace(-max_abs/2, max_abs/2, 11),
-			np.linspace(max_abs/2, max_abs, 5)
-			])
-	levels = np.unique(levels)
-	norm = BoundaryNorm(levels, 256)
-
-	# Then we plot each of the saved snapshots and generate a GIF
-	images = []
-
-	for i in range(len(times)):
-
-		fig, ax = plt.subplots(figsize=(8,4))
-		mesh = ax.contourf(lons, lats, vorticities[i], cmap='coolwarm', 
-					 		norm=norm, levels=levels, extend='both')
-		cbar = fig.colorbar(mesh, ax=ax, extend='both', label='Vorticity (1/s)')
-		cbar.set_ticks(levels)
-		ax.set_title(f'Vorticity field at t = {times[i]}h')
-		ax.set_xlabel(r'$\lambda$ (º)')
-		ax.set_ylabel(r'$\phi$ (º)')
-		fig.tight_layout()
-
-		fig_name = f"vorticity_field_{output_name}_t{times[i]}h.png"
-		fig.savefig(im_dir + "temp_frames/" + fig_name, dpi=150)
-		plt.close(fig)
-
-		images.append(imageio.v2.imread(im_dir + "temp_frames/" + fig_name))
-	
-	gif_name = f"vorticity_field_{output_name}_evolution.gif"
-	imageio.mimsave(im_dir + gif_name, images, duration=250, loop=0)
-
-	# Finally, we plot the streamfunction field evolution
-	images = []
-	vmin = np.min(streamfunctions.values)
-	vmax = np.max(streamfunctions.values)
-	step = 5e6
-	lvls = np.arange(vmin, vmax+step, step)
-
-	for i in range(len(times)):
-
-		fig, ax = plt.subplots(figsize=(8,4))
-		mesh = ax.contourf(lons,lats,streamfunctions[i],cmap='viridis',
-					 		levels=lvls, extend='both')
-		cbar = fig.colorbar(mesh, ax=ax, label=r'Streamfunction ($\mathrm{m^2/s}$)')
-		ax.set_title(f'Streamfunction field at t = {times[i]}h')
-		ax.set_xlabel(r'$\lambda$ (º)')
-		ax.set_ylabel(r'$\phi$ (º)')
-		fig.tight_layout()
-
-		fig_name = f"streamfunction_field_{output_name}_t{times[i]}h.png"
-		fig.savefig(im_dir + "temp_frames/" + fig_name, dpi=150)
-		plt.close(fig)
-
-		images.append(imageio.v2.imread(im_dir + "temp_frames/" + fig_name))
-	
-	gif_name = f"streamfunction_field_{output_name}_evolution.gif"
-	imageio.mimsave(im_dir + gif_name, images, duration=250, loop=0)
-
-	evo.close()
+		# First we plot a graph of the behaviour of the conserved values
+		plot_conserved_values(data_dir, output_name, im_dir)
+		# Then we plot the evolution of the vorticity and streamfunction fields
+		plot_fields_evolution(data_dir, output_name, im_dir)

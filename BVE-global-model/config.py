@@ -30,7 +30,8 @@ alpha = 0.5                           # Displacement factor
 
 # OUTPUT ====================================================================================================
 output_name = "exp_test"              # Name of the output folder
-save_time = 3 * 3600                  # Time interval between saves (in s) 
+save_time = 3 * 3600                  # Time interval between saves (in s)
+PLOT = True                           # Switch on/off plotting 
 
 
 # INITIAL CONDITIONS ========================================================================================
