@@ -1,7 +1,7 @@
 """
 Configuration file for the beta channel non-divergent barotropic vorticity equation (BVE) simulation.
 All the initial conditions of the simulation are defined in this file.
-This script has to be placed in the same direcotry as the main program main_BVE_beta.py
+This script has to be placed in the same direcotry as 'main.py'
 """
 
 
