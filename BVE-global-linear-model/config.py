@@ -38,6 +38,7 @@ alpha = 0.5        									# Displacement factor
 output_name = "exp_test"       						# Name of the output folder
 save_time = 6 * 3600         						# Time interval between saves (in s)
 PLOT = False         								# Switch on/off plotting
+MODE = 'linear'        								# Equation to solve: 'linear' or 'nonlinear' 
 
 
 # INITIAL CONDITIONS ========================================================================================
