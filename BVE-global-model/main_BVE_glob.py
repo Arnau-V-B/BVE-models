@@ -14,7 +14,6 @@ streamfunction and vorticity fields.
 # Python libraries to import
 import numpy as np
 from scipy.interpolate import RegularGridInterpolator
-import xarray as xr
 import pyshtools as pysh
 import time
 import sys
@@ -318,6 +317,13 @@ if __name__ == '__main__':
 	# We create a folder in 'output' to save the results of the specific experiment
 	os.makedirs(output_dir + output_name, exist_ok=True)
 
+	# Once all the parameters are defined, we create a dictionary to store the most frequently used
+	params = {
+		'gridtype': gridtype,
+		'lmax': lmax,
+		'start': start_date
+	}
+
 
 	# Now, we generate the initial fields >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 	print("Generating initial fields ...\n")
@@ -463,7 +469,9 @@ if __name__ == '__main__':
 
 	# In the end, we save the results of the simulation >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 	print('')
-	print("Saving simulation results...")
+	print("\nSaving simulation results...")
+
+	from saving import *
 
 	# We first copy the config.py file used in a '.txt' file
 	with (open("config.py", 'r') as file, 
@@ -476,115 +484,9 @@ if __name__ == '__main__':
 	os.makedirs(data_dir, exist_ok=True)
 
 	# First we save the conserved values
-	cons = xr.Dataset(
-		{
-			'kinetic_energy': (['iteration'], energies),
-			'enstrophy': (['iteration'], enstrophies),
-			'mean_vorticity': (['iteration'], mean_vorticities)
-		},
-		coords={
-			'iteration': np.arange(len(energies))
-		}
-	)
-
-	cons.attrs['description'] = 'Evolution of the conserved values during the simulation'
-	cons['kinetic_energy'].attrs = {
-		'description': 'Mean kinetic energy of the of the field at each iteration',
-		'units': 'm^2/s^2',
-		'long_name': 'Kinetic energy'
-	}
-	cons['enstrophy'].attrs = {
-		'description': 'Mean enstrophy of the of the field at each iteration',
-		'units': '1/s^2',
-		'long_name': 'Enstrophy'
-	}
-	cons['mean_vorticity'].attrs = {
-		'description': 'Mean vorticity of the of the field at each iteration',
-		'units': '1/s',
-		'long_name': 'Mean vorticity',
-		'positive': 'Cyclonic'
-	}
-	cons['iteration'].attrs['description'] = 'Iteration number in the simulation'
-	
-	cons_file = f"conserved_values_{output_name}.nc"
-	cons.to_netcdf(data_dir + cons_file)
-	cons.close()
-
+	save_conserved_values(data_dir, energies, enstrophies, mean_vorticities, output_name)
 	# And then the relative vorticity and streamfunction snapshots
-
-	# First, we generate the standard time, latitude and longitude coordinates
-	if gridtype == 'GLQ':
-		lon_grid = lon_grid[:-1]	# We remove the extra 360º longitude band
-
-	time_steps = np.array(times, dtype='timedelta64[s]')
-	date_times = start_date + time_steps	# Simulation dates
-
-	time_coord = xr.DataArray(
-		date_times,
-		dims='time',
-		attrs={
-			'long_name': 'time',
-			'standard_name': 'time'
-		}
-	)
-	lat_coord = xr.DataArray(
-		lat_grid,
-		dims='lat',
-		attrs={
-			'units': 'degrees_north',
-			'long_name': 'latitude',
-			'standard_name': 'latitude',
-			'stored_direction': 'decreasing'
-		}
-	)
-	lon_coord = xr.DataArray(
-		lon_grid,
-		dims='lon',
-		attrs={
-			'units': 'degrees_east',
-			'long_name': 'longitude',
-			'standard_name': 'longitude'
-		}
-	)
-
-	# Then we create the dataset and save the fields with their corresponding attributes
-	evo = xr.Dataset(
-		{
-			'streamfunction': (['time', 'lat', 'lon'], np.stack(streamfunctions)),
-			'vorticity': (['time', 'lat', 'lon'], np.stack(vorticities))
-		},
-		coords={
-			'time': time_coord,
-			'lat': lat_coord,
-			'lon': lon_coord
-		}
-	)
-
-	evo.attrs = {
-		'description': 'Evolution of 500 hPa relative vorticity and streamfunction fields through BVE simulation',
-		'Conventions': 'DF-1.7',
-		'history': f'Created on {time.ctime()}',
-		'source': 'Global barotropic vorticity equation simulation at 500 hPa in Python'
-	}
-	evo['streamfunction'].attrs = {
-		'description': '2D simulated streamfunction field',
-		'units': 'm**2 s**-1',
-		'long_name': 'Stream function',
-		'standard_name': 'streamfunction',
-		'gridType': f'{gridtype} (T{lmax})'
-	}
-	evo['vorticity'].attrs = {
-		'description': '2D simulated relative vorticity field',
-		'units': 's**-1',
-		'long_name': 'Vorticity (relative)',
-		'standard_name': 'vorticity',
-		'positive': 'Cyclonic',
-		'gridType': f'{gridtype} (T{lmax})'
-	}
-
-	evo_file = f"fields_evolution_{output_name}.nc"
-	evo.to_netcdf(data_dir + evo_file)
-	evo.close()
+	save_fields_evolution(data_dir, streamfunctions, vorticities, lon_grid, lat_grid, times, output_name, params)
 
 
 	# FIGURE PLOTTING =================================================================================================
