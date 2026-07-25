@@ -1,8 +1,7 @@
 """
 Configuration file for the global non-divergent barotropic vorticity equation (BVE) simulation.
 All the initial conditions of the simulation are defined in this file.
-This script has to be placed in the same direcotry as the main program main_BVE_glob_linear.py or
-main_BVE_glob_nonlinear.py.
+This script has to be placed in the same direcotry as 'main.py'
 """
 
 
@@ -37,7 +36,7 @@ alpha = 0.5        									# Displacement factor
 # OUTPUT ====================================================================================================
 output_name = "exp_test"       						# Name of the output folder
 save_time = 6 * 3600         						# Time interval between saves (in s)
-PLOT = False         								# Switch on/off plotting
+PLOT = True         								# Switch on/off plotting
 MODE = 'linear'        								# Equation to solve: 'linear' or 'nonlinear' 
 
 
