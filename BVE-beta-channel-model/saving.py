@@ -1,5 +1,6 @@
 """
-Module with the functions to save the results obtained after the BVE simulation.
+Module with the functions to save the results obtained after the BVE simulation
+in the beta-plane approximation.
 The data is saved in NetCDF4 files inside the 'ouput/exp_()/data/' folder.
 This script has to be placed in the same directory as 'main.py'
 """
