@@ -14,7 +14,6 @@ streamfunction and vorticity fields.
 # Python libraries to import
 import numpy as np
 import scipy as sp
-import xarray as xr
 import time
 import sys
 import os
@@ -464,7 +463,9 @@ if __name__ == '__main__':
 
 	# In the end, we save the results of the simulation >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 	print('')
-	print("Saving simulation results...")
+	print("\nSaving simulation results...")
+
+	from saving import *
 
 	# We first copy the config.py file used in a '.txt' file
 	with (open("config.py", 'r') as file, 
@@ -477,89 +478,9 @@ if __name__ == '__main__':
 	os.makedirs(data_dir, exist_ok=True)
 
 	# First we save the conserved values
-	cons = xr.Dataset(
-		{
-			'kinetic_energy': (['iteration'], energies),
-			'enstrophy': (['iteration'], enstrophies),
-			'mean_vorticity': (['iteration'], vorticity_means)
-		},
-		coords={
-			'iteration': np.arange(len(energies))
-		}
-	)
-
-	cons.attrs['description'] = 'Evolution of the conserved values during the simulation'
-	cons['kinetic_energy'].attrs = {
-		'description': 'Mean kinetic energy of the of the field at each iteration',
-		'units': 'm^2/s^2',
-		'long_name': 'Kinetic energy'
-	}
-	cons['enstrophy'].attrs = {
-		'description': 'Mean enstrophy of the of the field at each iteration',
-		'units': '1/s^2',
-		'long_name': 'Enstrophy'
-	}
-	cons['mean_vorticity'].attrs = {
-		'description': 'Mean vorticity of the of the field at each iteration',
-		'units': '1/s',
-		'long_name': 'Mean vorticity',
-		'positive': 'Cyclonic'
-	}
-	cons['iteration'].attrs['description'] = 'Iteration number in the simulation'
-	
-	cons_file = f"conserved_values_{output_name}.nc"
-	cons.to_netcdf(data_dir + cons_file)
-	cons.close()
-
+	save_conserved_values(data_dir, energies, enstrophies, vorticity_means, output_name)
 	# And then the relative vorticity and streamfunction snapshots
-	evo = xr.Dataset(
-		{
-			'streamfunction': (['time', 'y', 'x'], np.stack(streamfunctions)),
-			'vorticity': (['time', 'y', 'x'], np.stack(vorticities))
-		},
-		coords={
-			'time': times,
-			'y': y,
-			'x': x
-		}
-	)
-
-	evo.attrs = {
-		'description': 'Evolution of the 500 hPa relative vorticity and streamfunction fields in a linear beta-channel BVE simulation',
-		'Conventions': 'CF-1.7',
-		'history': f'Created on {time.ctime()}',
-		'source': 'Beta-channel barotropic vorticity equation simulation at 500 hPa in Python'
-	}
-	evo['streamfunction'].attrs = {
-		'description': '2D simulated streamfunction perturbation field',
-		'units': 'm**2 s**-1',
-		'long_name': 'Stream function',
-		'standard_name': 'streamfunction'
-	}
-	evo['vorticity'].attrs = {
-		'description': '2D simulated relative vorticity perturbation field',
-		'units': 's**-1',
-		'long_name': 'Vorticity (relative)',
-		'standard_name': 'vorticity',
-		'positive': 'Cyclonic'
-	}
-	evo['x'].attrs = {
-		'description': 'Eastward distance from Greenwich meridian',
-		'units': 'm'
-	}
-	evo['y'].attrs = {
-		'description': 'Northward distance from lowest latitude band',
-		'units': 'm'
-	}
-	evo['time'].attrs = {
-		'units': 's',
-		'long_name': 'time',
-		'standard_name': 'time'
-	}
-
-	evo_file = f"fields_evolution_{output_name}.nc"
-	evo.to_netcdf(data_dir + evo_file)
-	evo.close()
+	save_fields_evolution(data_dir, streamfunctions, vorticities, x, y, times, output_name)
 
 
 	# FIGURE PLOTTING =================================================================================================
