@@ -22,7 +22,7 @@ def grid2spec(field, args):
 		field       : 2D array (nlat, nlon) of grid field
 		args        : extra general arguments
 	(internal) -->
-		grid        : type of grid quadrature: DH or GLQ
+		grid        : type of grid quadrature: GLQ or DH
 		lmax        : maximum wavenumber for spectral triangular truncation
 		weights     : weights for each of the roots of Legendre polynomial of roder lmax
 		nodes       : roots of Legendre polynomial of order lmax
@@ -59,8 +59,8 @@ def spec2grid(field_spec, args):
 					 [0,:,:] for cosine coefficients and [1,:,:] for sine coefficients
 		args       : extra general arguments
 	(internal) -->
-		grid       : type of grid quadrature: DH or GLQ
-		sampl      : sampling of the resulting gridded field
+		grid       : type of grid quadrature: GLQ or DH
+		sampl      : number of latitude gridpoints in the resulting gridded field
 		nodes      : roots of Legendre polynomial of order lmax
 	(output) -->
 		field      : 2D array (nlat, nlon) of the gridded field
@@ -71,7 +71,7 @@ def spec2grid(field_spec, args):
 	nodes = args['glq_nodes']
 
 	if grid == 'DH':
-		field = pysh.expand.MakeGridDH(field_spec, sampling=2, lmax=sampl)
+		field = pysh.expand.MakeGridDH(field_spec, sampling=2, lmax=(sampl-2)//2)
 
 	elif grid == 'GLQ':
 		field = pysh.expand.MakeGridGLQ(field_spec, zero=nodes, lmax=sampl)

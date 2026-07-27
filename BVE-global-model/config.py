@@ -28,6 +28,15 @@ nu = 0.1                              # Damping factor
 alpha = 0.5                           # Displacement factor
 
 
+# SPECTRAL SCHEME ===========================================================================================
+lmax = 85                             # Spectral triangular truncation (maximum wavenumber represented)
+gridtype = 'GLQ'                      # Spectral transform algorithm:
+                                      #     Gauss-Legendre (GLQ) --> Gaussian latitudes grid (N+1)x(2N+1)
+                                      #                              (slower but exact, RECOMMENDED)
+                                      #     Discroll-Healy (DH) --> Equally sampled grid Nx2N
+                                      #                             (faster but needs more gridpoints for a given truncation)
+
+
 # OUTPUT ====================================================================================================
 output_name = "exp_test"              # Name of the output folder
 save_time = 3 * 3600                  # Time interval between saves (in s)
@@ -52,17 +61,3 @@ lat = ds['latitude'].values
 lon = ds['longitude'].values
 
 ds.close()
-
-
-# SPECTRAL SCHEME ===========================================================================================
-gridtype = 'GLQ'     # Type of grid quadrature: Discroll-Healy (DH) --> Equally sampled Nx2N
-                     #                          Gauss-Legendre (GLQ) --> Gaussian latitudes (N+1)x(2N+1)
-
-# We define the grid sampling and triangular truncation
-if gridtype == 'DH':
-    sampl = (len(lat) - 1) // 2 - 1         # Number of samples for grid representation
-    lmax = sampl                            # Maximum wavenumber for spectral triangular truncation
-                                            # lmax <= sampl
-elif gridtype == 'GLQ':
-    sampl = 128
-    lmax = 85
