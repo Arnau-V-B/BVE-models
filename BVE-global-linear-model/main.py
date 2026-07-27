@@ -38,24 +38,20 @@ os.makedirs(output_dir, exist_ok=True)
 
 print("Obtaining model parameters ...\n")
 
-# We begin verifying that truncation is lower than the grid sampling
-if lmax > sampl:
-	raise ValueError("lmax must be smaller or equal to sampl")
-
-# We set the grid coordinates (different for DH and GLQ)
-glq_nodes, glq_weights = None, None
-if gridtype == 'DH':
-	# DH grid scheme has less spectral resolution: nlat_grid ~ 2*sampling
-	nlat_grid = 2 * sampl + 2
-	lat_grid = np.linspace(90, -90, nlat_grid)					# 90º to -90º
-	lon_grid = np.linspace(0, 360, 2*nlat_grid, endpoint=False) # 0º to 360º (not included)
-	lons_grid, lats_grid = np.meshgrid(lon_grid, lat_grid)
-elif gridtype == 'GLQ':
-	# GLQ grid scheme has highest spectral resolution: nlat_grid ~ sampling
-	nlat_grid = sampl
+# We set the grid coordinates (different for GLQ and DH algorithms)
+if gridtype == 'GLQ':
+	# GLQ scheme needs a quadratic grid: 2*nlat = 3*(lmax + 1) ; though a linear grid would be sufficient
+	nlat_grid = int(3/2 * (lmax + 1))
 	glq_nodes, glq_weights = pysh.expand.SHGLQ(nlat_grid)	# Hermite polynomials zeros
 	lat_grid = np.degrees(np.arcsin(glq_nodes))				# Gaussian latitudes
 	lon_grid = np.linspace(0, 360, 2*nlat_grid+1)			# 0º to 360º (included)
+	lons_grid, lats_grid = np.meshgrid(lon_grid, lat_grid)
+elif gridtype == 'DH':
+	# DH scheme needs a cubic grid: 2*nlat = 4*(lmax + 1)
+	nlat_grid = int(2 * lmax + 2)
+	glq_nodes, glq_weights = None, None
+	lat_grid = np.linspace(90, -90, nlat_grid)					# 90º to -90º
+	lon_grid = np.linspace(0, 360, 2*nlat_grid, endpoint=False) # 0º to 360º (not included)
 	lons_grid, lats_grid = np.meshgrid(lon_grid, lat_grid)
 
 # We precompute some useful parameters
@@ -99,7 +95,7 @@ params = {
 	'radius': R,
 	'gridtype': gridtype,
 	'lmax': lmax,
-	'sampl': sampl,
+	'sampl': nlat_grid,
 	'glq_nodes': glq_nodes,
 	'glq_weights': glq_weights,
 	'f': f,
