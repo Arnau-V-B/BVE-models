@@ -1,26 +1,26 @@
 # Global non-divergent Barotropic Vorticity Equation (BVE) $$\beta$$-channel solver
 
-This model solves the non-divergent BVE on the $$\beta$$-plane aproximation in cartesian coordinates using Fast Fourier Transforms (FFT) in x and a centered differences scheme in y. It is designed to simulate Rossby wave propagation and dispersion in the most simple aproximation (a $$\beta$$-channel) so that the results can be directly compared to the analytic solutions that appear after solving the system. It also includes the option to add an very simple extra forcing term to the equation that takes into account the effect of topography through changes in depth.
+This model solves the non-divergent BVE on the $$\beta$$-plane aproximation in cartesian coordinates using Fast Fourier Transforms (FFT) in $$x$$ and a centered differences scheme in $$y$$. It is designed to simulate Rossby wave propagation and dispersion in the most simple aproximation (a $$\beta$$-channel) so that the results can be directly compared to the analytic solutions that appear after solving the system. It also includes the option to add an very simple extra forcing term to the equation that takes into account the effect of topography through changes in depth.
 
-The model solves the equation in a latitudinally enclosed domain, with periodic boundary conditions in x and Dirichlet in y (in particular, no flow conditions: $$\psi_{y=0} = \psi_{y=N_y} = 0$$), and doesn't include any diffusion terms for numerical stability. The time integration follows a leapfrog scheme with a Robert–Asselin–Williams (RAW) filter to control its associated computational mode and improve the accuracy to third order (i.e. $$O(\Delta t^3)$$), and the time step is set to 30 min (but it can be lowered if numerical instability appears).
+The model solves the equation in a latitudinally enclosed domain, with periodic boundary conditions in $$x$$ and Dirichlet in $$y$$ (in particular, no flow conditions: $$\psi_{y=0} = \psi_{y=N_y} = 0$$), and doesn't include any diffusion terms for numerical stability. The time integration follows a leapfrog scheme with a Robert–Asselin–Williams (RAW) filter to control its associated computational mode and improve the accuracy up to third order (i.e. $$O(\Delta t^3)$$), and the time step is set to 30 min (but it can be lowered if numerical instability appears).
 
 ## Mathematical formalism
 
-### The $$beta$$-channel approximation
+### The $$\beta$$-channel approximation
 
-In a latitudinally restricted domain, the sphericity of the Earth's can have negligible effects so the surface can be considered as locally flat in pretty good approximation. In this case, the Coriolis parameter $$f$$ becomes constant with latitude, so the planetary vorticity advection effect disappears completely and Rossby waves as they are known can no longer exist. In order to avoid this, a more accurate approximation can be made by expanding the Coriolis parameter in a Taylor series around the central latitude $\theta_0$ up to the first order (i.e., linearly):
+In a latitudinally restricted domain, the sphericity of the Earth can have negligible effects so the surface can be considered as locally flat in pretty good approximation. In this case, the Coriolis parameter $$f$$ becomes constant with latitude, so the planetary vorticity advection effect disappears completely and Rossby waves as they are known can no longer exist. In order to avoid this, a more accurate approximation can be made by expanding the Coriolis parameter in a Taylor series around the central latitude $\varphi_0$ up to the first order (i.e., linearly):
 
-$$f \approx f_0 + \beta y \quad \mathrm{; with} \quad \beta = \left.\frac{\partial f}{\partial y}\right|_{\theta_0} = \frac{2\Omega}{R}\cos\theta_0 = ctt;$$
+$$f \approx f_0 + \beta y \quad \mathrm{; with} \quad \beta = \left.\frac{\partial f}{\partial y}\right|_{\varphi_0} = \frac{2\Omega}{R}\cos\varphi_0 = ctt;$$
 
-where $$\Omega$$ is the angular rotation speed of the Earth and $$R$$ its radius. In this case, given a background flow with the following properties: $$u = \overline{U} + u' \ ; \ v = v'$$ (where $$\overline{}$$ denotes the mean state and ' the perturbation), the non-divergent BVE can be linearized as follows:
+where $$\Omega$$ is the angular rotation speed of the Earth and $$R$$ its radius. In this case, given a background flow with the following properties: $$u = \overline{U} + u' \ ; \ v = v'$$ (where the overline denotes the mean state and the prime the perturbation), the non-divergent BVE can be linearized as follows:
 
 $$\frac{\partial \zeta'}{\partial t} \approx - \overline{U} \frac{\partial \zeta'}{\partial x} - v'\left(\beta + \frac{\partial \overline{\zeta}}{\partial y}\right) \quad \mathrm{; where} \quad \overline{\zeta} = - \frac{\partial \overline{U}}{\partial y};$$
 
-which is the equation solved in `main_BVE_beta.py`.
+which is the equation solved in `main.py`.
 
 ### The Fast Fourier Transforms (FFT)
 
-Given a field $$\psi$$ that is continuous and periodic in the x direction on an interval $$0\leq x \leq L$$, it can be decomposed into an infinite series of sinusoidal functions known as Fourier series:
+Given a field $$\psi$$ that is continuous and periodic in the $$x$$ direction on an interval $$0\leq x \leq L$$, it can be decomposed into an infinite series of sinusoidal functions known as Fourier series:
 
 $$\psi(x) = \sum_{k=-\inf}^{\inf} \hat{\psi}_k e^{i2\pi k x/L} \quad \mathrm{; with} \quad \hat{\psi}_k = \frac{1}{L}\int_0^L \psi(x)e^{-i2\pi k x/L}dx$$
 
@@ -30,21 +30,21 @@ $$\frac{\partial \hat{\psi}_k}{\partial x} = ik \hat{\psi}_k;$$
 
 and the solution obtained is exact, unlike the one obtained with finite differences schemes.
 
-### The time integration
+### The Robert-Asselin-Williams (RAW) filter
 
 Finally, to integrate in time, a first order Euler scheme is used at the first iteration:
 
-$$\zeta_{i+1} = \zeta_i + \Delta t RHS_i,$$
+$$\zeta_{i+1} = \zeta_i + \Delta t \ F(\zeta_i),$$
 
-and then a third order scheme based on a leapfrog with RAW filter is used for the following iterations:
+where $$F(\zeta_i)$$ is the RHS of the BVE. Then a seconf order leapfrog scheme is used modified with a RAW filter, which is composed of the following three steps:
 
-$$\zeta_{i+1} = \zeta_{i-1} + 2\Delta t RHS_i$$
+$$\zeta_{i+1} = \tilde{\tilde{\zeta}}_{i-1} + 2\Delta t \ F(\tilde{\zeta}_i)$$
 
-$$\zeta_i = \zeta_i + \frac{\nu \alpha}{2}(\zeta_{i+1} - 2\zeta_i + \zeta_{i-1})$$
+$$\tilde{\tilde{\zeta}}_i = \tilde{\zeta}_i + \frac{\nu \alpha}{2}(\zeta_{i+1} - 2\tilde{\zeta}_i + \tilde{\tilde{\zeta}}_{i-1})$$
 
-$$\zeta_{i+1} = \zeta_{i+1} - \frac{\nu (1-\alpha)}{2}(\zeta_{i+1} - 2\zeta_i + \zeta_{i-1});$$
+$$\tilde{\zeta}_{i+1} = \zeta_{i+1} - \frac{\nu (1-\alpha)}{2}(\zeta_{i+1} - 2\tilde{\zeta}_i + \tilde{\tilde{\zeta}}_{i-1});$$
 
-where $$\nu=0.1$$ and $$\alpha=0.5$$ seem to conserve kinetic energy, enstrophy and mean vorticity the most.
+where $$i$$ denotes the time iteration, the tilde symbol shows the amount of filtering passes, $$\nu\in[0,1]$$ damps the computational mode and $$\alpha\in[0.5,1]$$ displaces the solutions to improve integration acuracy. The combination $$\nu=0.1$$ and $$\alpha=0.5$$ seem conserve kinetic energy, enstrophy and mean vorticity the most.
 
 ## Requirements
 
@@ -61,4 +61,4 @@ All the code has been written in Python v3.13.7 on a Windows 11 laptop with both
 
 ## License
 
-This program is completely open source and was made in colaboration with Universitat de Barcelona as part of a master's degree final thesis.
+This program is completely open source and was made in colaboration with Universitat de Barcelona as part of a master's thesis.
